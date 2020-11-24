@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const PostModel = require('../models/posts');
+const PostModel = require('../models/post');
 
 exports.get_all_posts = async (req, res, next) => {
     try {
@@ -95,7 +95,6 @@ exports.delete_post = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
 
         await PostModel.findByIdAndRemove(id);
-
         res.status(200).json({ message: "Post deleted successfully." });
 
     } catch (error) {
