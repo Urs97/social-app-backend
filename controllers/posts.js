@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const PostModel = require('../models/post');
 
-exports.get_all_posts = async (req, res, next) => {
+exports.get_all_posts = async (req, res) => {
     try {
         const posts = await PostModel.find();
         res.status(200).json(posts);
@@ -12,7 +12,7 @@ exports.get_all_posts = async (req, res, next) => {
     }
 };
 
-exports.get_single_post = async (req, res, next) => {
+exports.get_single_post = async (req, res) => {
     const { id } = req.params;
     try {
         if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
@@ -25,7 +25,7 @@ exports.get_single_post = async (req, res, next) => {
     }
 }
 
-exports.create_post = async (req, res, next) => {
+exports.create_post = async (req, res) => {
 
     const { title, content, author } = req.body;
     const newPost = new PostModel({ title, content, author });
@@ -40,7 +40,7 @@ exports.create_post = async (req, res, next) => {
     }
 };
 
-exports.update_post = async (req, res, next) => {
+exports.update_post = async (req, res) => {
     const { id } = req.params;
     const { title, author, content } = req.body;
     try {
@@ -56,7 +56,7 @@ exports.update_post = async (req, res, next) => {
     }
 }
 
-exports.like_post = async (req, res, next) => {
+exports.like_post = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -72,7 +72,7 @@ exports.like_post = async (req, res, next) => {
     }
 };
 
-exports.dislike_post = async (req, res, next) => {
+exports.dislike_post = async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -88,7 +88,7 @@ exports.dislike_post = async (req, res, next) => {
     }
 };
 
-exports.delete_post = async (req, res, next) => {
+exports.delete_post = async (req, res) => {
     const { id } = req.params;
 
     try {
