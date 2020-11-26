@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const UserModel = require('../models/user');
+const RefreshTokenModel = require('../models/refreshToken');
 
 exports.signup = async (req, res) => {
 
@@ -35,25 +36,21 @@ exports.login = async (req, res) => {
 
         if (user.length === 0) return res.status(401).json({ message: 'Authentication failed' });
 
-        bcrypt.compare(password, user[0].password, (err, result) => {
+        bcrypt.compare(password, user[0].password, async (err, result) => {
             if (err) {
                 return res.status(401).json({ message: 'Authentication failed' });
             } 
             if (result) {
-                const accessToken = jwt.sign(
-                    {
-                    email: user[0].email,
-                    userId: user[0]._id
-                    },
-                    process.env.JWT_PRIVATE_KEY,
-                    {
-                        expiresIn: '1h'
-                    }
-                );
+                const accessToken = jwt.sign({ name: user[0].email }, process.env.JWT_ACCESS_KEY, { expiresIn: '15m' });
+
+                const refreshToken = jwt.sign({ name: user[0].email }, process.env.JWT_REFRESH_KEY);
+                const newRefreshTokenDb = new RefreshTokenModel({ token: refreshToken });
+                await newRefreshTokenDb.save();
 
                 return res.status(200).json({
                     message: 'Authentication successful',
-                    acessToken: accessToken
+                    accessToken: accessToken,
+                    refreshToken: refreshToken
                 })
             }
             return res.status(401).json({ message: 'Authentication failed' });
@@ -63,6 +60,22 @@ exports.login = async (req, res) => {
         res.status(401).json({ message: 'Authentication failed '});
     }
 };
+
+exports.refresh_token = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const refreshToken = authHeader && authHeader.split(' ')[1];
+    if (!refreshToken) return res.sendStatus(401);
+
+    const dbRefreshToken = await RefreshTokenModel.find({ token: refreshToken });
+    if (dbRefreshToken.length === 0) return res.sendStatus(403);
+
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, (err, user) => {
+        if (err) return res.sendStatus(403);
+
+        const accessToken = jwt.sign(({ user: user.name }), process.env.JWT_ACCESS_KEY, { expiresIn: '15m' });
+        res.json({ accessToken: accessToken });
+    })
+  };
 
 exports.get_all_users = async (req, res) => {
 
