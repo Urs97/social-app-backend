@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/signup', UsersController.signup);
 router.post('/login', UsersController.login);
 router.post('/token', UsersController.refresh_token);
+router.delete('/logout', UsersController.logout);
 router.get('/', authToken, UsersController.get_all_users);
 router.post('/', authToken, UsersController.create_user);
 router.get('/:id', authToken, UsersController.get_single_user);

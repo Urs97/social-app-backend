@@ -61,6 +61,19 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.logout = async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const refreshToken = authHeader && authHeader.split(' ')[1];
+
+    try {
+        await RefreshTokenModel.findOneAndRemove({ token: refreshToken });
+        res.status(200).json({ message: 'Logout successful'});
+        
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
 exports.refresh_token = async (req, res) => {
     const authHeader = req.headers['authorization'];
     const refreshToken = authHeader && authHeader.split(' ')[1];
